@@ -2,3 +2,7 @@
 .lock*
 build/
 .*.sw[po]
+*.py[co]
+__pycache__/
+dep/
+data/
