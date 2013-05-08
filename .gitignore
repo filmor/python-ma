@@ -1,6 +1,7 @@
 .waf*
 .lock*
 build/
+.ipynb_checkpoints/
 .*.sw[po]
 *.py[co]
 __pycache__/
