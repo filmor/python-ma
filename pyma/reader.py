@@ -61,17 +61,19 @@ def get_matrices(tf, run, size=3):
     max_t = idx.max().item()
     
     def get_matrix(t):
-        result = np.zeros((size * 2) ** 2)
+        result = np.zeros((size * 2, size * 2))
         
-        for i in range(size ** 2):
-            data = df[(df.x == i // size) & (df.y == i % size)]["data"].item()
-            # TODO
-            result[i] = data[data["local/smeared"] == 1]["data"][t + 1]
-            result[i+1] = data[data["local/smeared"] == 3]["data"][t + 1]
-            result[i
+        for row in range(size):
+            for col in range(size):
+                data = df[(df.x == row) & (df.y == col)]["data"].item()
 
+                get = lambda i: data[data["local/smeared"] == i]["data"][t + 1]
+
+                sub_matrix = np.array([[get(1), get(3)], [get(5), get(7)]])
+
+                result[2*row:2*(row+1), 2*col:2*(col+1)] = sub_matrix
             
-        return result.reshape((size, size))
+        return result
 
     return LazyList(get_matrix, max_t)
 
