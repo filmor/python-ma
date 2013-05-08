@@ -58,14 +58,18 @@ def get_matrices(tf, run, size=3):
     df["data"] = df["info"].map(lambda x: read_file(tf.extractfile(x)))
 
     idx = next(df["data"].items())[1].index
-    max_t = idx.max().values.tolist()
+    max_t = idx.max().item()
     
     def get_matrix(t):
-        result = np.zeros(size ** 2)
+        result = np.zeros((size * 2) ** 2)
         
-        for i in range(len(result)):
-            data = next(df[(df.x == i // size) & (df.y == i % size)]["data"].items())[1]
+        for i in range(size ** 2):
+            data = df[(df.x == i // size) & (df.y == i % size)]["data"].item()
+            # TODO
             result[i] = data[data["local/smeared"] == 1]["data"][t + 1]
+            result[i+1] = data[data["local/smeared"] == 3]["data"][t + 1]
+            result[i
+
             
         return result.reshape((size, size))
 
