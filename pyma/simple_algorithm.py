@@ -57,11 +57,11 @@ def solve_gevp_gen(a, t_0):
             pass
 
         
-def calculate_gevp(m):
+def calculate_gevp(m, compress=(lambda A, B: A, B)):
     res_values = {}
     for i in range(32):
         ev = []
-        for eigenvalues, _eigenvectors in solve_gevp_gen(m, i):
+        for eigenvalues, _eigenvectors in solve_gevp_gen(m, i, compress):
             ev.append(eigenvalues)
 
         if len(ev):
