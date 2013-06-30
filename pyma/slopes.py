@@ -20,25 +20,31 @@ def get_first_consec(array, eps=0.05):
                 start = n
         else:
             if n > start:
-                return slice(start, n)
+                return slice(start, n, 1)
 
-def get_slopes(gevps, eps=0.05):
-    gevps_log = np.log(gevps)
+def get_slope_simple(data, error=None, eps=0.05):
+    if error is None:
+        error = pd.Series(1, index=data.index)
 
-    results = []
+    mean = np.log(data)
+    first_deriv = np.convolve(mean, [1, -1])
+    second_deriv = np.convolve(mean, [-1, 2, -1])
 
-    for run, sample in gevps_log.groupby(level=0):
-        for t_0, df in sample.groupby(level=1):
-            first_deriv = convolve(df, [1, -1])
-            second_deriv = convolve(df, [-1, 2, -1])
-            
-            for i in gevps:
-                try:
-                    s = first_deriv[i][get_first_consec(second_deriv[i], eps)]
-                    results.append((i, run, t_0, s.mean(), s.std(), s.count()))
-                except KeyError:
-                    continue
-        
-    return pd.DataFrame(results,
-                        columns="eigenvalue run t_0 mean std count".split()
-            ).set_index(["eigenvalue", "run", "t_0"])
+    s = first_deriv[get_first_consec(second_deriv, eps)]
+    return s.mean(), s.std()
+
+# def get_slope_as_exp
+
+from scipy.optimize import curve_fit
+
+def get_slope_exp_fit(data, error=None):
+    error = pd.Series(1, index=data.index) if error is None else error
+
+    fit_result, cov_matrix = curve_fit(
+            lambda x, A, B: A * np.exp(-B * x),
+            data.index.data,
+            data.data,
+            np.array([1., 1.])
+        )
+
+    return fit_result
