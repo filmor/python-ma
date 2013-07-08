@@ -9,12 +9,12 @@ def max_index(iterable):
 def solve_gevp(B, A=None):
     """Solve the generalised eigenvalue problem using the Cholesky
     decomposition."""
-    L = la.cholesky(B)
+    L = np.matrix(la.cholesky(B))
     L_inv = la.inv(L)
     L_inv_t = L_inv.transpose()
 
     def solve_gevp(A):
-        A_prime = L_inv * A * L_inv_t
+        A_prime = L_inv * np.matrix(A) * L_inv_t
         return la.eigh(A_prime)
 
     if A is None:
@@ -22,8 +22,11 @@ def solve_gevp(B, A=None):
     else:
         return solve_gevp(A)
 
+def permutation_indices(data):
+     return sorted(range(len(data)), key = data.__getitem__)
 
-def solve_gevp_gen(a, t_0):
+# TODO: Compression
+def solve_gevp_gen(a, t_0, compress=None):
     """Generator that returns the eigenvalues for t_0 -> t
        where t is in (t_0, t_max]."""
     try:
@@ -37,17 +40,21 @@ def solve_gevp_gen(a, t_0):
     for j in range(t_0 + 1, 32):
         try:
             eigenvalues, new_eigenvectors = f(a[j])
-
+            
             if eigenvectors is None:
-                eigenvectors = new_eigenvectors
+                eigenvectors = np.zeros_like(new_eigenvectors)
+
+            if j < 15:
+                # TODO Sortieren nach Eigenwert
+                perm = permutation_indices(eigenvalues)
             else:
-                dot_products = [np.dot(e, eigenvectors) for e in
+                dot_products = [np.dot(e, eigenvectors / count) for e in
                         new_eigenvectors.transpose()]
 
                 perm = [m.argmax() for m in dot_products]
 
-                eigenvectors = eigenvectors + new_eigenvectors[:,perm]
-                eigenvalues = eigenvalues[:,perm]
+            eigenvectors = eigenvectors + new_eigenvectors[:,perm]
+            eigenvalues = eigenvalues[:,perm]
                 
             count += 1
 
@@ -57,7 +64,7 @@ def solve_gevp_gen(a, t_0):
             pass
 
         
-def calculate_gevp(m, compress=(lambda A, B: A, B)):
+def calculate_gevp(m, compress=(lambda A, B: (A, B))):
     res_values = {}
     for i in range(32):
         ev = []
