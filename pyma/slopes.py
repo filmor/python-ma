@@ -37,14 +37,15 @@ def get_slope_simple(data, error=None, eps=0.05):
 
 from scipy.optimize import curve_fit
 
-def get_slope_exp_fit(data, error=None):
+def get_slope_exp_fit(data, error=None, range=slice(1,7)):
     error = pd.Series(1, index=data.index) if error is None else error
 
     fit_result, cov_matrix = curve_fit(
             lambda x, A, B: A * np.exp(-B * x),
-            data.index.data,
-            data.data,
-            np.array([1., 1.])
+            data[range].index.data,
+            data[range].data,
+            np.array([0.4, 0.4]),
+            sigma = error[range].data
         )
 
-    return fit_result
+    return fit_result, cov_matrix
