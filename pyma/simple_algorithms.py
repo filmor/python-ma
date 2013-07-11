@@ -1,7 +1,9 @@
 import numpy as np
-import numpy.linalg as la
-import scipy.linalg as sla
+import scipy.linalg as la
 import pandas as pd
+
+def scipy_solver(B, A):
+    return la.eigh(a=A, b=B)
 
 def cholesky_solver(B, A=None):
     """Solve the generalised eigenvalue problem using the Cholesky

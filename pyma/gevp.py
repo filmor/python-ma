@@ -17,7 +17,7 @@ def solve_gevp_gen(a, t_0, algorithm, sort_by_vectors=15, **kwargs):
         f = algorithm(B=B, **kwargs)
     except TypeError:
         # If the function doesn't do currying, implement that here
-        f = lambda A: solve_gevp(B=B, A=A)
+        f = lambda A: algorithm(B=B, A=A)
     except LinAlgError:
         return
 
@@ -47,7 +47,7 @@ def solve_gevp_gen(a, t_0, algorithm, sort_by_vectors=15, **kwargs):
 
             yield eigenvalues, eigenvectors / count
 
-        except la.LinAlgError:
+        except (LinAlgError, TypeError) as e:
             pass
 
 
