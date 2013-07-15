@@ -23,7 +23,7 @@ def cholesky_solver(B, A=None):
 
 def qz_solver(B, A):
     # A - \lambda B = Q(S - \lambda T)Z*
-    S, T, Q, Z = sla.qz(A=A, B=B)
+    S, T, Q, Z = la.qz(A=A, B=B)
     eigenvalues = np.array(S).diagonal() / np.array(T).diagonal()
 
     # TODO: Calculate eigenvectors
