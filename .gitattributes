@@ -1,1 +1,2 @@
 *.ipynb filter=strip_output diff=strip_output
+text=auto
