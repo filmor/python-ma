@@ -10,5 +10,5 @@ def _pe_single(A):
 def pro_esprit(B, A):
     B_ = _pe_single(B)
     A_ = _pe_single(A)
-    return scipy_solver(B, A)
+    return tuple(i.real for i in la.eig(b=B, a=A))
 
