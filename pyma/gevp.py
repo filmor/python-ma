@@ -4,7 +4,24 @@ from numpy.linalg import LinAlgError
 import pandas as pd
 
 def permutation_indices(data):
-     return sorted(range(len(data)), key = data.__getitem__)
+     return list(reversed(sorted(range(len(data)), key = data.__getitem__)))
+
+def reorder_by_ev(ev1, ev2, B):
+    # TODO: res seems to be broken here, investigate!
+    ev1_b = np.dot(np.array(B), ev1)
+
+    dot_products = [
+            np.abs(np.dot(e, ev1_b)) for e in ev2.transpose()
+            ]
+
+    res = []
+    for m in dot_products:
+        for candidate in permutation_indices(m):
+            if not candidate in res:
+                res.append(candidate)
+                break
+
+    return res
 
 def max_index(iterable):
     return max(enumerate(iterable), key=itemgetter(1))
@@ -23,7 +40,7 @@ def solve_gevp_gen(a, t_0, algorithm, sort_by_vectors=15, **kwargs):
 
     eigenvectors = None
     count = 0
-    
+
     for j in range(t_0 + 1, 32):
         try:
             eigenvalues, new_eigenvectors = f(np.matrix(a[j]))
@@ -35,23 +52,21 @@ def solve_gevp_gen(a, t_0, algorithm, sort_by_vectors=15, **kwargs):
                 # TODO Sortieren nach Eigenwert
                 perm = permutation_indices(eigenvalues)
             else:
-                dot_products = [np.dot(e, eigenvectors / count) for e in
-                        new_eigenvectors.transpose()]
+                perm = reorder_by_ev(new_eigenvectors, eigenvectors, B)
 
-                perm = [m.argmax() for m in dot_products]
-
-            eigenvectors = eigenvectors + new_eigenvectors[:,perm]
+            eigenvectors = new_eigenvectors[:,perm]
             eigenvalues = eigenvalues[:,perm]
                 
             count += 1
 
-            yield eigenvalues, eigenvectors / count
+            yield eigenvalues, eigenvectors
 
         except (LinAlgError, TypeError) as e:
+            #import traceback
+            #traceback.print_exc()
             pass
 
-
-def calculate_gevp(m, algorithm, sort_by_vectors=15, **kwargs):
+def calculate_gevp(m, algorithm, sort_by_vectors=99, **kwargs):
     res_values = {}
     for i in range(32):
         ev = []
