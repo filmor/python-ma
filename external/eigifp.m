@@ -108,14 +108,14 @@ if ( isnumeric(A) )
     if (any(size(A) ~= n))
         error('Input Error: Matrix A is not square');
     end
-elseif ( ~isstr(A) ) 
+elseif ( ~ischar(A) ) 
     error('Input Error: A must be either a matrix or a function');
 end 
 
 B=[];
 if ( nargin>1 )
     if ( (~ isstruct(varargin{2})) ) 
-        if( isstr(varargin{2}) | (any(size(varargin{2}) ~= 1)))
+        if( ischar(varargin{2}) | (any(size(varargin{2}) ~= 1)))
         B=varargin{2};
         if ( isnumeric(B) )
             if ( isempty(n) )
@@ -124,7 +124,7 @@ if ( nargin>1 )
             if (any(size(B) ~= n))
                     error('Input Error: Matrix B must be square and of the size of A');
             end
-        elseif ( ~isstr(B) ) 
+        elseif ( ~ischar(B) ) 
             error('Input Error: B must be either a matrix or a function');
         end         
         end
@@ -271,7 +271,7 @@ if ( nargin > 1 + ~isempty(B) + ksetbyuser )
         if ( ~isempty(usePreconIn) &  ~isempty(L) )
             error('Input Error: input opt.useprecon while a preconditioner has been provided.'); 
         end
-        if (isstr(usePreconIn))
+        if (ischar(usePreconIn))
             if (strcmp(upper(usePreconIn),'NO'))
                 usePrecon=0;                    
             end
@@ -326,7 +326,7 @@ end
 if ( isempty(normB) )
     if ( isempty(B) )
         normB=1;
-    elseif ( isstr(B) )
+    elseif ( ischar(B) )
         normB=norm(feval(B,ones(n,1)), 1)/n; 
         fprintf(1,'Warning: no options.Bnorm (estimate of ||B||_1) is not provided.\n');    
     elseif ( isnumeric(B) )
@@ -350,7 +350,7 @@ else
     toleranceVec=[toleranceA,toleranceB];
 end
 
-if ( isstr(A) | isstr(B) ) 
+if ( ischar(A) | ischar(B) ) 
     usePrecon=0;
 end
 
@@ -491,7 +491,7 @@ for i = 2:m-1,
                     % as well as Bx and (A-lambda B)x 
     if ( (~isempty(B)) & isnumeric(B) )
         bx=B*r;
-    elseif ( (~isempty(B)) & isstr(B) )
+    elseif ( (~isempty(B)) & ischar(B) )
         bx=feval(B, r);
     else 
         bx=r; 
@@ -504,7 +504,7 @@ for i = 2:m-1,
     temp = sqrt(temp);
     
     V(:,i) = r;
-    if (isstr(A))
+    if (ischar(A))
         r=feval(A, V(:,i))-lambda*bx;
     else
         r=A*V(:,i)-lambda*bx;
@@ -578,13 +578,13 @@ elseif ( temp <= 1e-2*diffNorm )    % recompute (A-lambda B)diff if necessary
     if ( (~isempty(B)) & isnumeric(B) )
         bDiff=B*V(:,m);
         Wb(:,m)=bDiff;
-    elseif ( (~isempty(B)) & isstr(B) )
+    elseif ( (~isempty(B)) & ischar(B) )
         bDiff=feval(B, V(:,m));
         Wb(:,m)=bDiff;
     else 
         bDiff=V(:,m); 
     end
-    if (isstr(A))
+    if (ischar(A))
         rDiff=feval(A, V(:,m))-lambda*bDiff;
     else
         rDiff=A*V(:,m)-lambda*bDiff;
@@ -656,12 +656,12 @@ tol0=tol(1) + abs(lambda)*tol(2);
 if ( res < tol0 | m>10 )        % recompute bx and r if necessary 
     if ( (~isempty(B)) & isnumeric(B) )
         bx=B*x;  
-    elseif ( (~isempty(B)) & isstr(B) )
+    elseif ( (~isempty(B)) & ischar(B) )
         bx=feval(B, x);
     else
         bx=x; 
     end 
-    if (isstr(A))
+    if (ischar(A))
         r=feval(A, x);
     else
         r=A*x;
@@ -732,13 +732,13 @@ for i = 1:(m-2)
     if ( (~isempty(B)) & isnumeric(B) )
         bx=B*V(:,i+1);  
         Wb(:,i+1)=bx;
-    elseif ( (~isempty(B)) & isstr(B) )
+    elseif ( (~isempty(B)) & ischar(B) )
         bx=feval(B, V(:,i+1));
         Wb(:,i+1)=bx;
     else 
         bx=V(:,i+1);  
     end 
-    if (isstr(A))
+    if (ischar(A))
         r=feval(A, V(:,i+1))-lambda*bx;
     else
         r=A*V(:,i+1)-lambda*bx;
@@ -791,13 +791,13 @@ elseif ( temp <= 1e-2*diffNorm )
         if ( (~isempty(B)) & isnumeric(B) )
         bDiff=B*V(:,m);
             Wb(:,m)=bDiff;
-    elseif ( (~isempty(B)) & isstr(B) )
+    elseif ( (~isempty(B)) & ischar(B) )
         bDiff=feval(B, V(:,m));
             Wb(:,m)=bDiff;
     else 
         bDiff=V(:,m); 
     end
-    if (isstr(A))
+    if (ischar(A))
         rDiff=feval(A, V(:,m))-lambda*bDiff;
     else
         rDiff=A*V(:,m)-lambda*bDiff;
@@ -904,12 +904,12 @@ tol0=tol(1) + abs(lambda)*tol(2);
 if ( res < tol0 | m> 10)        % recompute bx and r if necessary 
     if ( (~isempty(B)) & isnumeric(B) )
         bx=B*x;  
-    elseif ( (~isempty(B)) & isstr(B) )
+    elseif ( (~isempty(B)) & ischar(B) )
         bx=feval(B, x);
         else
             bx=x; 
     end 
-    if (isstr(A))
+    if (ischar(A))
         r=feval(A, x);
     else
         r=A*x;
@@ -973,7 +973,7 @@ for l=1:k
     
     if ( (~isempty(B)) & isnumeric(B) )
         bx=B*x; 
-    elseif ( (~isempty(B)) & isstr(B) )
+    elseif ( (~isempty(B)) & ischar(B) )
         bx=feval(B, x);
     else 
         bx=x;  
@@ -984,7 +984,7 @@ for l=1:k
         error('Error: B is not positive definite.');
     end
 
-    if (isstr(A))
+    if (ischar(A))
         r=feval(A, x);
     else
         r=A*x;
@@ -1204,7 +1204,7 @@ n=size(A, 1);
     
                     % compute L U factors 
 options.thresh=0;
-options.udiag=1;
+%options.udiag=1;
 if (eta ==2)
     options.milu=1; 
     [L, U] = luinc(A, options);
