@@ -3,13 +3,24 @@ import tables
 import numpy as np
 import math
 import itertools
-import pyma.gevp as ge
-from .masses import *
+try:
+    from gevp import calculate_gevp
+except ImportError:
+    from .gevp import calculate_gevp
 
 def load_data(filename, key):
     with tables.open_file(filename) as t:
         data = np.array(t.get_node(key))
     return data
+
+def write_data(filename, key, data):
+    with tables.open_file(filename, mode="a", title="Output data") as table:
+        try:
+            table.remove_node(key)
+        except tables.NoSuchNodeError:
+            pass
+        base, _, leaf = key.rpartition("/")
+        table.create_array(base, leaf, data, createparents=True)
 
 def estimate_pencil_error(data):
     # Calculate the variance of each matrix by calculating the respective
@@ -24,8 +35,6 @@ def estimate_pencil_error(data):
     return matrix_errors
 
 def mass_plot(t_0, ev, ax, masses):
-    # masses = data.xs(t_0, level=1)[ev].groupby(level=0, group_keys=False).apply(calc_masses)
-    
     yerr = masses.ix[1:].std(level=1)
     y = masses.ix[0]
     
@@ -45,8 +54,8 @@ def mass_plot(t_0, ev, ax, masses):
     print(("'Fit': %." + precision + "f +- %." + precision + "f") % (avg, std))
 
 
-def calculate(data, algorithm):
-    gevs = pd.concat((ge.calculate_gevp(d, algorithm) for d in data),
+def calculate(data, algorithm, filter=lambda x: x):
+    gevs = pd.concat((calculate_gevp(filter(d), algorithm) for d in data),
             keys=itertools.count())
     return gevs
 

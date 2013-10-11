@@ -79,3 +79,4 @@ def calculate_gevp(m, algorithm, sort_by_vectors=99, **kwargs):
             res_values[i] = pd.DataFrame(ev)
 
     return pd.concat(res_values)
+

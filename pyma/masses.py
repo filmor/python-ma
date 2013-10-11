@@ -1,3 +1,6 @@
+import math
+import numpy as np
+
 def acosh(x):
     try:
         return math.acosh(x)
