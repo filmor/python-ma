@@ -2,6 +2,7 @@
 .lock*
 build/
 .ipynb_checkpoints/
+Untitled*.ipynb
 .*.sw[po]
 *.py[co]
 __pycache__/
