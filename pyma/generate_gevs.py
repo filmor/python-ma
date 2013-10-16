@@ -46,21 +46,20 @@ def main_(inp, fil, alg, output_file, overwrite=False):
 
     print("Running %s ... " % key)
 
-    ev_count = int(input_config["ev_count"])
-
     data = load_data(input_config["filename"], input_config["key"])
     filter = import_(filter_func, filter_params)
     algo = import_(algo_func, algo_params)
 
     res = calculate(data, algo, filter)
 
-    print("Writing the first %s evs of %s to %s" % (ev_count, key, output_file))
-    res[list(range(ev_count))].to_hdf(output_file, key)
+    print("Writing the gevs of %s to %s" % (key, output_file))
+    res.to_hdf(output_file, key)
 
     print("Done with %s" % key)
 
     print("Starting analysis on %s" % key)
     # TODO, from test_algo
+    ev_count = int(input_config["ev_count"])
 
     return True
 
