@@ -91,6 +91,8 @@ def unpack(config):
 
 def config_iter(config, args=()):
     for inp in config["input"].items():
+        if inp[0].startswith("_"):
+            continue
         for f in unpack(config["filter"]):
             for a in unpack(config["algorithm"]):
                 yield (inp, f, a) + args
