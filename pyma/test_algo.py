@@ -54,9 +54,12 @@ def mass_plot(t_0, ev, ax, masses):
     print(("'Fit': %." + precision + "f +- %." + precision + "f") % (avg, std))
 
 
-def calculate(data, algorithm, filter=lambda x: x):
-    gevs = pd.concat((calculate_gevp(filter(d), algorithm) for d in data),
-            keys=itertools.count())
+def calculate(data, algorithm):
+    def gen():
+        for n, d in enumerate(data):
+            yield calculate_gevp(d, algorithm)
+
+    gevs = pd.concat(gen(), keys=itertools.count())
     return gevs
 
 

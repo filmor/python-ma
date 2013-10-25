@@ -55,16 +55,14 @@ class PgfPlotter(object):
         self._store = pd.HDFStore(data_file, "r")
         mpl.use("pgf", warn=False)
 
-    def start(self):
-        self._fig = plt.figure(figsize=(5, 4))
+    def start(self, figsize=(5, 4)):
+        self._fig = plt.figure(figsize=figsize)
         self._ax = self._fig.gca()
-        self._ax.set_ylim((0, 1))
 
     def plot(self, data_set, t_0, ev, label):
         data = self._store[data_set]
         mass_plot(data, t_0, ev, self._ax, label)
 
     def end(self):
-        self._ax.legend()
         self._fig.savefig(sys.stdout, format="pgf")
 
