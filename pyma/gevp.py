@@ -64,11 +64,11 @@ def solve_gevp_gen(a, t_0, algorithm, sort_by_vectors=15, **kwargs):
         except (LinAlgError, TypeError) as e:
             #import traceback
             #traceback.print_exc()
-            pass
+            return
 
-def calculate_gevp(m, algorithm, sort_by_vectors=99, **kwargs):
+def calculate_gevp(m, algorithm, sort_by_vectors=99, max_t0=4, **kwargs):
     res_values = {}
-    for i in range(32):
+    for i in range(max_t0 + 1):
         ev = []
         for eigenvalues, _eigenvectors in \
                 solve_gevp_gen(m, i, algorithm,

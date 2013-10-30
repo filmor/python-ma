@@ -57,7 +57,10 @@ def mass_plot(t_0, ev, ax, masses):
 def calculate(data, algorithm):
     def gen():
         for n, d in enumerate(data):
-            yield calculate_gevp(d, algorithm)
+            try:
+                yield calculate_gevp(d, algorithm)
+            except:
+                print("%d failed" % n)
 
     gevs = pd.concat(gen(), keys=itertools.count())
     return gevs

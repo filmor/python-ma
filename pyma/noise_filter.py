@@ -36,11 +36,11 @@ def get_hankel_matrix(y):
 
 def get_values_from_hankel_matrix(m):
     return np.array([
-                        np.mean(list(anti_diag(m, i)))
-                        for i in range(sum(m.shape) - 1)
-                     ])
+        np.mean(list(anti_diag(m, i)))
+        for i in range(sum(m.shape) - 1)
+        ])
 
-def filter_step(y, p):
+def data_to_hankel_matrix(y):
     if len(y.shape) > 2:
         raise ArgumentError
     elif len(y.shape) == 2:
@@ -49,12 +49,10 @@ def filter_step(y, p):
                 for m in y.transpose()
             ]).transpose()
     else:
-        H = get_hankel_matrix(m)
+        H = get_hankel_matrix(y)
+    return H
 
-    u, s, vh = la.svd(H, full_matrices=False)
-    s[p:] = 0
-    X = np.dot(u, np.dot(la.diagsvd(s, u.shape[0], vh.shape[0]), vh))
-
+def data_from_hankel_matrix(y, X):
     if len(y.shape) == 2:
         size = y.shape[0] // 2
         return np.array([
@@ -63,6 +61,23 @@ def filter_step(y, p):
             ]).transpose()
     else:
         return get_values_from_hankel_matrix(X)
+
+
+def filter_step(y, modifier):
+    if type(modifier) is int:
+        p = modifier
+        def func(s):
+            s[p:] = 0
+            return s
+        modifier = func
+
+    H = data_to_hankel_matrix(y)
+
+    u, s, vh = la.svd(H, full_matrices=False)
+    s = modifier(s)
+    X = np.dot(u, np.dot(la.diagsvd(s, u.shape[0], vh.shape[0]), vh))
+    return data_from_hankel_matrix(y, X)
+
 
 def classical_se_algorithm(y, n, p):
     for i in range(n):
@@ -80,13 +95,53 @@ def ise_algorithm(x, l, p):
             y -= s
     return x
 
-def classical_matrix_se_algorithm(d, n, p):
-    flattened = np.array(tuple(to_vector(m) for m in d)) 
-    result = classical_se_algorithm(flattened, n, p)
-    return np.array(tuple(from_vector(m) for m in result))
+def run_on_flattened_data(data, algo, *args, **kwargs):
+    res = []
+    for d in data:
+        flattened = np.array(tuple(to_vector(m) for m in d)) 
+        result = algo(flattened, *args, **kwargs)
+        res.append(np.array(tuple(from_vector(m) for m in result)))
+    return np.array(res)
 
-def matrix_ise_algorithm(d, l, p, symmetric=True):
-    flattened = np.array(tuple(to_vector(m) for m in d)) 
-    result = ise_algorithm(flattened, l, p)
-    return np.array(tuple(from_vector(m) for m in result))
+def classical_matrix_se_algorithm(data, **kwargs):
+    return run_on_flattened_data(data, classical_se_algorithm, **kwargs)
+
+def matrix_ise_algorithm(data, **kwargs):
+    return run_on_flattened_data(data, ise_algorithm, **kwargs)
+
+def matrix_minimum_variance(data, n):
+    algo = classical_se_algorithm
+
+    noisy = data[1:][:,n:,:,:]
+
+    noise = []
+
+    for d in noisy:
+        x = np.array([to_vector(m) for m in d])
+        H = data_to_hankel_matrix(x)
+        _, s, _ = la.svd(H, full_matrices=False)
+        noise.append(s)
+
+    noise = np.mean(noise)
+
+    def func(s):
+        n = np.ones_like(s) * noise
+        res = s - n ** 2 / s
+        return res
+
+    return run_on_flattened_data(data, classical_se_algorithm, p=func, n=10)
+
+def minimum_variance(x, n):
+    """n: noise limit"""
+    H = data_to_hankel_matrix(x[n:])
+    u, s, vh = la.svd(H, full_matrices=False)
+    noise = s * 10
+
+    def modifier(s):
+        n = np.zeros_like(s)
+        n[:noise.shape[0]] = noise
+        res = s - n ** 2 / s
+        return res
+
+    return filter_step(x, modifier)
 

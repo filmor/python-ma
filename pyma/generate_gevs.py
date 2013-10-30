@@ -56,9 +56,7 @@ def run_filter(inp, fil, args):
     data = load_data(input_config["filename"], input_config["key"])
     filter = import_(filter_func, filter_params)
 
-    result = np.array([
-        filter(t) for t in data
-        ])
+    result = filter(data)
 
     print("Writing filtered data %s to %s" % (key, args.output_file))
     write_data(args.output_file, key, result)
