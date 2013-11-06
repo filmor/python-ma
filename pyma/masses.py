@@ -25,6 +25,9 @@ def calc_masses(gevs, method="cosh"):
     return gevs.groupby(level=[0, 1],
             group_keys=False).apply(calc_masses_cosh).reorder_levels([1,2,0])
 
+
+from scipy.optimize import curve_fit
+
 def mass_plot(data, t_0, ev, ax, label, calc_masses=calc_masses_cosh):
     masses = data.xs(t_0, level=1)[ev].groupby(level=0, group_keys=False)\
             .apply(calc_masses)
@@ -34,7 +37,23 @@ def mass_plot(data, t_0, ev, ax, label, calc_masses=calc_masses_cosh):
     
     x = y.index
         
-    ax.errorbar(x, y, fmt=".", yerr=yerr, label=label)
+    plot = ax.errorbar(x, y, fmt=".", yerr=yerr, label=label)
+    #color = plot.lines[0].get_color()
+
+    #f = lambda x,a,b,c: a * np.exp(-b * x) + c
+
+    #p, pdiv = curve_fit(f, np.array(x), np.array(y), p0=(1, 1, min(y)),
+    #                    sigma=np.array(1/yerr**2),
+    #                    maxfev=10000)
+
+    #sys.stderr.write(str(p))
+
+    #p_err, p_errdiv = curve_fit(f, np.array(yerr.index),
+    #        np.array(yerr), p0=(1,-1,1))
+
+    #x = np.linspace(x[0] - 1, x[-1] + 1)
+    #ax.plot(x, f(x, *p), color=color)
+    # p, p_err
     
     #sum_of_weights = (1 / yerr ** 2).sum()
     #avg = (y / yerr ** 2).sum() / sum_of_weights
