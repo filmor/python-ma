@@ -9,6 +9,8 @@ masses.plot_mass
 masses.plot_err
 masses.plot_fit
 noise_analysis.plot_noise_histogram
+noise_analysis.plot_noise_svdvals
+noise_analysis.plot_signal_svdvals
 """.split("\n")
 
 from functools import partial

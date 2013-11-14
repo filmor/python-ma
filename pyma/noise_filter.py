@@ -28,10 +28,11 @@ def anti_diag(X, n=0):
     for i in range(lower, upper + 1):
         yield X[i, n - i]
 
-def get_hankel_matrix(y):
-    l = len(y)
-    L = l // 2 + 1
-    M = L - (0 if l % 2 == 1 else 1)
+def get_hankel_matrix(y, L=None):
+    N = len(y)
+    if L is None:
+        L = N // 2 + 1
+    M = N - L + 1
     return la.hankel(y)[:L,:M]
 
 def get_values_from_hankel_matrix(m):
@@ -84,13 +85,13 @@ def classical_se_algorithm(y, n, p):
         y = filter_step(y, p)
     return y
 
-def ise_algorithm(x, l, p):
+def ise_algorithm(x, l, p, n):
     for i in range(l):
         y = np.copy(x)
         x = np.zeros_like(y)
         
         for j in range(p):
-            s = filter_step(y, 1)
+            s = filter_step(y, n)
             x += s
             y -= s
     return x
