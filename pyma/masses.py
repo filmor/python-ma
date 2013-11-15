@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import pandas as pd
 
 def _set_false_after_first(val):
     start = len(val)
@@ -25,20 +26,15 @@ def calc_masses_cosh(arr):
 def calc_masses_exp(arr):
     return np.log(arr.shift(1) / arr)
 
-def calc_masses(gevs, method="cosh"):
-    if method == "exp":
-        method = calc_masses_exp
-    elif method == "cosh":
-        method = calc_masses_cosh
-    else:
-        raise ValueError("Should be cosh or exp")
+def calc_mass_curve(data, t_0, ev, calc_masses=calc_masses_cosh,
+        filter=lambda x: x):
 
-    return gevs.groupby(level=[0, 1],
-            group_keys=False).apply(calc_masses_cosh).reorder_levels([1,2,0])
+    def do_calc(x):
+        y = filter(x)
+        return calc_masses(pd.Series(y, index=x.index))
 
-def calc_mass_curve(data, t_0, ev, calc_masses=calc_masses_cosh):
     masses = data.xs(t_0, level=1)[ev].groupby(level=0, group_keys=False)\
-            .apply(calc_masses)
+            .apply(do_calc)
     return masses.ix[0].shift(t_0), \
            masses.ix[1:].std(level=1).shift(t_0)
 

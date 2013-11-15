@@ -85,7 +85,7 @@ def classical_se_algorithm(y, n, p):
         y = filter_step(y, p)
     return y
 
-def ise_algorithm(x, l, p, n):
+def ise_algorithm(x, l, p, n=1):
     for i in range(l):
         y = np.copy(x)
         x = np.zeros_like(y)
