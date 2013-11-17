@@ -90,8 +90,22 @@ def ise_algorithm(x, l, p, n=1):
         y = np.copy(x)
         x = np.zeros_like(y)
         
+        # While-Schleife, solange machen bis <0.1 der norm übrig ist oder so
         for j in range(p):
             s = filter_step(y, n)
+            x += s
+            y -= s
+    return x
+
+def ise_algorithm_dyn(x, n, p):
+    for i in range(n):
+        y = np.copy(x)
+        norm = np.sum(y ** 2)
+        x = np.zeros_like(y)
+        
+        # While-Schleife, solange machen bis <0.1 der norm übrig ist oder so
+        while np.sum(y ** 2) > 0.2 * norm:
+            s = filter_step(y, p)
             x += s
             y -= s
     return x
@@ -109,6 +123,9 @@ def classical_matrix_se_algorithm(data, **kwargs):
 
 def matrix_ise_algorithm(data, **kwargs):
     return run_on_flattened_data(data, ise_algorithm, **kwargs)
+
+def matrix_ise_algorithm_dyn(data, **kwargs):
+    return run_on_flattened_data(data, ise_algorithm_dyn, **kwargs)
 
 def matrix_minimum_variance(data, n):
     algo = classical_se_algorithm
@@ -130,7 +147,7 @@ def matrix_minimum_variance(data, n):
         res = s - n ** 2 / s
         return res
 
-    return run_on_flattened_data(data, classical_se_algorithm, p=func, n=10)
+    return run_on_flattened_data(data, classical_se_algorithm, p=func, n=1)
 
 def minimum_variance(x, n):
     """n: noise limit"""
