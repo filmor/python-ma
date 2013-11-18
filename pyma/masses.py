@@ -53,27 +53,36 @@ def plot_err(ax, curve, label):
     plot = ax.plot(x, np.array(y / yerr), label=label)
 
 from scipy.optimize import curve_fit
-def plot_fit(ax, curve, initial, color=None):
-    x = y.index
+def plot_fit(ax, curve, limits, label, color=None):
+    y, yerr = curve
+    full_x = y.dropna().index
+    x = full_x[limits[0]:limits[1]]
+    y = y[x]
+    yerr = yerr[x]
 
     f = lambda x,a,b,c: a * np.exp(-b * x) + c
+
     p, pdiv = curve_fit(f, np.array(x), np.array(y), p0=(1, 1, min(y)),
-                        sigma=np.array(1/yerr**2),
-                        maxfev=10000)
+            maxfev=10000, sigma=np.array(yerr**2))
 
     #sys.stderr.write(str(p))
 
-    p_err, p_errdiv = curve_fit(f, np.array(yerr.index), np.array(yerr),
-            p0=(1,-1,1))
+#    p_err, p_errdiv = curve_fit(f, np.array(yerr.index), np.array(yerr),
+#            p0=(1,-1,1))
 
-    x = np.linspace(x[0] - 1, x[-1] + 1)
-    ax.plot(x, f(x, *p), color=color)
+    full_x = np.linspace(full_x[0] - 1, full_x[-1] + 1)
+
+    ax.plot(full_x, f(full_x, *p), color=color, label=label)
     # p, p_err
     
     sum_of_weights = (1 / yerr ** 2).sum()
-    avg = (y / yerr ** 2).sum() / sum_of_weights
-    std = (((y - avg) / yerr)**2).sum() / sum_of_weights
+    # avg = (y / yerr ** 2).sum() / sum_of_weights
+    # std = (((y - avg) / yerr)**2).sum() / sum_of_weights
+    avg = p[2]
+    std = np.sqrt(pdiv[2,2])
     
-    # precision = str(int(ceil(-math.log10(std))))
-    # (("'Fit': %." + precision + "f +- %." + precision + "f for %s") % (avg, std, label))
+    import sys
+    precision = str(int(math.ceil(-math.log10(std))) + 1)
+    print(("'Fit': %." + precision + "f +- %." + precision + "f for %s") % (avg,
+        std, label), file=sys.stderr)
 
