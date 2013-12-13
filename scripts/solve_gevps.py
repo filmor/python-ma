@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 import traceback
 
+
+
 def import_(func, params):
     from importlib import import_module
     from functools import partial
@@ -42,7 +44,7 @@ def check_key(filename, key):
     return result
 
 def run_filter(inp, fil, args):
-    from test_algo import load_data, write_data
+    from pyma.data import load_data, write_data
     input_name, input_config = inp
     filter_name, filter_func, filter_params = fil
 
@@ -66,7 +68,7 @@ def run_filter(inp, fil, args):
 
 
 def run_algo(inp, fil, alg, args):
-    from test_algo import load_data, calculate
+    from pyma.data import load_data, calculate
     
     input_name, _ = inp
     filter_name, _, _ = fil
